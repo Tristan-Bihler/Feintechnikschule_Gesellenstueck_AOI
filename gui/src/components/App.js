@@ -12,9 +12,7 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route exact path='/' element={<PrivateRoute/>}>
-            <Route exact path='/' element={<Dashboard/>}/>
-          </Route>
+          <Route exact path='/' element={<Dashboard/>}/>
           <Route path = "/signup" element = {<Signup />} />
           <Route path = "/login" element = {<Login />} />
           <Route path = "/files" element = {<Files />} />
