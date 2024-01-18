@@ -1,7 +1,7 @@
 import { AuthProvider } from "../contexts/AuthContext";
 import Signup from "./Signup"
 import React from "react";
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
+import {BrowserRouter as Router, Switch, Route} from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Login from "./Login";
 import Files from "./Files"
@@ -11,12 +11,12 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
+        <Switch>
           <Route exact path='/' element={<Dashboard/>}/>
           <Route path = "/signup" element = {<Signup />} />
           <Route path = "/login" element = {<Login />} />
           <Route path = "/files" element = {<Files />} />
-        </Routes>
+        </Switch>
       </AuthProvider>
     </Router>
     
