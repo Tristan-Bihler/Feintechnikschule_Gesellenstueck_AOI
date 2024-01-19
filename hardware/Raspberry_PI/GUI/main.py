@@ -55,7 +55,7 @@ class MachineScreen(QWidget):
     def start_button_clicked(self):
         print("Start button clicked on Machine Screen")
         # Update the value in the Realtime Database to 1 when the Start button is clicked
-        machine_ref = self.db.child("machines").child("AOI1_ATHENA")
+        machine_ref = self.db.child("machines").child("lumina_mk1")
         machine_ref.update({"status": 1})
 
 class MainWindow(QMainWindow):
@@ -90,6 +90,7 @@ class MainWindow(QMainWindow):
         self.machine_screen.show()
         self.setCentralWidget(self.machine_screen)
         self.setWindowTitle("Machine Screen")
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
