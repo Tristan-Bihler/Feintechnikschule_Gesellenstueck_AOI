@@ -1,42 +1,36 @@
 import cv2
-import numpy as np
+from skimage.metrics import structural_similarity as ssim
 
-original = cv2.imread("check_if_two_images_are_equal\\images\\Plat1.jpg")
-image_to_compare = cv2.imread("check_if_two_images_are_equal\\images\\Plat3.jpg")
+def capture_image_from_camera():
+    capture = cv2.VideoCapture(0)
+    ret, frame = capture.read()
+    capture.release()
+    return frame
 
-# 1) Check if 2 images are equals
-if original.shape == image_to_compare.shape:
-    print("The images have same size and channels")
-    difference = cv2.subtract(original, image_to_compare)
-    b, g, r = cv2.split(difference)
+def compare_images(reference_image, captured_image):
+    # Convert images to grayscale
+    gray_reference = cv2.cvtColor(reference_image, cv2.COLOR_BGR2GRAY)
+    gray_captured = cv2.cvtColor(captured_image, cv2.COLOR_BGR2GRAY)
 
-    if cv2.countNonZero(b) == 0 and cv2.countNonZero(g) == 0 and cv2.countNonZero(r) == 0:
-        print("The images are completely Equal")
-    else:
-        print("The images are NOT equal")
-		
-# 2) Check for similarities between the 2 images
+    # Compute SSIM
+    similarity_index, _ = ssim(gray_reference, gray_captured, full=True)
+    similarity_percentage = similarity_index * 100
 
-sift = cv2.xfeatures2d.SIFT_create()
-kp_1, desc_1 = sift.detectAndCompute(original, None)
-kp_2, desc_2 = sift.detectAndCompute(image_to_compare, None)
+    print(f"SSIM: {similarity_percentage:.2f}%")
 
-index_params = dict(algorithm=0, trees=5)
-search_params = dict()
-flann = cv2.FlannBasedMatcher(index_params, search_params)
+    # Show the reference and captured images
+    cv2.imshow("Reference Image", gray_reference)
+    cv2.imshow("Captured Image", gray_captured)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-matches = flann.knnMatch(desc_1, desc_2, k=2)
+# Example usage
+if __name__ == "__main__":
+    # Capture a reference image from the camera
+    reference_image = capture_image_from_camera()
 
-good_points = []
-ratio = 0.6
-for m, n in matches:
-	if m.distance < ratio*n.distance:
-		good_points.append(m)
-print(len(good_points))
-result = cv2.drawMatches(original, kp_1, image_to_compare, kp_2, good_points, None)
+    # Capture an image to be compared from the camera
+    captured_image = capture_image_from_camera()
 
-cv2.imshow("result", result)
-cv2.imshow("Original", original)
-cv2.imshow("Duplicate", image_to_compare)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # Call the function to compare images
+    compare_images(reference_image, captured_image)

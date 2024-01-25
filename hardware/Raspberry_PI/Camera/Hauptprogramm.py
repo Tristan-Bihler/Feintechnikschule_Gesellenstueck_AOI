@@ -1,7 +1,7 @@
 import pyrebase
+import subprocess
 
-# Firebase configuration
-
+program_name = 'Vergleicher.py'
 
 
 # Function to sign in a user with email and password
@@ -13,7 +13,15 @@ def login_user(email, password):
         # Example: Retrieve data from the 'users' node after successful login
         data = db.child("machines").child("lumina_mk1").get()
         print("Data from the 'users' node:")
-        print(data.val())
+        print(data)
+        for test in data.each(): 
+            print(test.val())
+            if test.val() == 1:
+                try:
+                    similarity_script = r'hardware\\Raspberry_PI\\Camera\\Vergleicher.py'
+                    subprocess.run(['python', similarity_script], check=True)
+                except subprocess.CalledProcessError as e:
+                    print(f"Error: {e}")
         machine_ref = db.child("machines").child("lumina_mk1")
         machine_ref.update({"status": 0})
 
