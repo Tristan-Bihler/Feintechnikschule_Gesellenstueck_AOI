@@ -1,5 +1,12 @@
 import cv2
 import numpy as np
+import smbus
+import sys
+
+addr = 0x8 # bus address
+bus = SMBus(1)
+bus = smbus.SMBus(1)
+address = 0x04   
 
 def draw_crosshair(frame, center, size=20, color=(255, 0, 0), thickness=2):
     x, y = center
@@ -47,15 +54,19 @@ def main():
                 # Check the position of the crosshair and provide instructions
                 if center[0] < frame.shape[1] // 2:
                     print("Move the crosshair to the right.")
+                    bus.write_byte(address,"r")
                 elif center[0] > frame.shape[1] // 2:
                     print("Move the crosshair to the left.")
+                    bus.write_byte(address,"l")
                 else:
                     print("Crosshair is close to the center horizontally. Adjust as needed.")
 
                 if center[1] < frame.shape[0] // 2:
                     print("Move the crosshair down.")
+                    bus.write_byte(addr, "u")
                 elif center[1] > frame.shape[0] // 2:
                     print("Move the crosshair up.")
+                    bus.write_byte(addr, "d")
                 else:
                     print("Crosshair is close to the center vertically. Adjust as needed.")
                     

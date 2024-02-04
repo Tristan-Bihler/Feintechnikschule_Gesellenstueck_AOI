@@ -6,6 +6,7 @@ char c;
 
 void setup() {
   // Join I2C bus as slave with address 8
+  Serial.begin(9600);
   Wire.setSDA(0);
   Wire.setSCL(1);
   Wire.begin(0x8);
@@ -21,9 +22,12 @@ void setup() {
 void receiveEvent(int howMany) {
   while (Wire.available()) {  // loop through all but the last
     char c = Wire.read();     // receive byte as a character
+    Serial.write(c);
+    Serial.println(c);
   }
-  if (c == 0x1) {
-    digitalWrite(dirPin, HIGH);  // Enables the motor to move in a particular direction
+  
+  if (c == HIGH) {
+    digitalWrite(dirPin, c);  // Enables the motor to move in a particular direction
     // Makes 200 pulses for making one full cycle rotation
     for (int x = 0; x < 800; x++) {
       digitalWrite(stepPin, HIGH);
@@ -32,8 +36,8 @@ void receiveEvent(int howMany) {
       delayMicroseconds(700);
     }
     delay(1000);  // One second delay
-  } else if (c == 0x0) {
-    digitalWrite(dirPin, LOW);  //Changes the rotations direction
+  } else if (c == LOW) {
+    digitalWrite(dirPin, c);  //Changes the rotations direction
     // Makes 400 pulses for making two full cycle rotation
     for (int x = 0; x < 1600; x++) {
       digitalWrite(stepPin, HIGH);
