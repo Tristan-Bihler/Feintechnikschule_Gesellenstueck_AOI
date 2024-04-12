@@ -35,11 +35,15 @@ class LoginScreen(QWidget):
             self.login_success.emit()
         except Exception as e:
             print(f"Login failed: {e}")
-            QMessageBox.critical(self, "Login failes", QMessageBox.Ok)
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Information)
+            msgBox.setText("Login failed")
+            msgBox.setWindowTitle("Login")
+            msgBox.setStandardButtons(QMessageBox.Ok)
 
-class MachineScreen(QWidget):
+class Dashboard(QWidget):
     def __init__(self, firebase, parent=None):
-        super(MachineScreen, self).__init__(parent)
+        super(Dashboard, self).__init__(parent)
         self.firebase = firebase
         self.db = self.firebase.database()
 
@@ -65,31 +69,31 @@ class MainWindow(QMainWindow):
         self.firebase = firebase
 
         self.login_screen = LoginScreen(self.firebase)
-        self.login_screen.login_success.connect(self.show_dashboard)
+        self.login_screen.login_success.connect(self.show_start)
 
-        self.dashboard_screen = QWidget(self)
-        self.dashboard_layout = QVBoxLayout(self.dashboard_screen)
+        self.start_screen = QWidget(self)
+        self.start_layout = QVBoxLayout(self.start_screen)
 
-        self.machine_screen = MachineScreen(self.firebase, self)
-        self.machine_screen.hide()
+        self.dashboard_screen = Dashboard(self.firebase, self)
+        self.dashboard_screen.hide()
 
         self.setCentralWidget(self.login_screen)
-        self.setWindowTitle("Login Screen")
+        self.setWindowTitle("Login")
 
-    def show_dashboard(self):
-        self.setCentralWidget(self.dashboard_screen)
-        self.setWindowTitle("Dashboard Screen")
+    def show_start(self):
+        self.setCentralWidget(self.start_screen)
+        self.setWindowTitle("Start")
 
         # Add navigation buttons in the Dashboard Screen
-        self.dashboard_layout.addWidget(QLabel("Navigation:"))
-        machine_button = QPushButton("Machine Screen", self)
-        machine_button.clicked.connect(self.show_machine_screen)
-        self.dashboard_layout.addWidget(machine_button)
+        self.start_layout.addWidget(QLabel("Navigation:"))
+        dashboard_button = QPushButton("Dashboard", self)
+        dashboard_button.clicked.connect(self.show_dashboard_screen)
+        self.start_layout.addWidget(dashboard_button)
 
-    def show_machine_screen(self):
-        self.machine_screen.show()
-        self.setCentralWidget(self.machine_screen)
-        self.setWindowTitle("Machine Screen")
+    def show_dashboard_screen(self):
+        self.dashboard_screen.show()
+        self.setCentralWidget(self.dashboard_screen)
+        self.setWindowTitle("Dashboard")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
