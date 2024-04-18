@@ -3,37 +3,37 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton,
 import pyrebase
 from PyQt5.QtCore import pyqtSignal
 
-class LoginScreen(QWidget):
-    login_success = pyqtSignal()
+class LoginScreen(QWidget):                                        //Klasse für das Loginscreen
+    login_success = pyqtSignal()                                    
 
     def __init__(self, firebase, parent=None):
         super(LoginScreen, self).__init__(parent)
-        self.firebase = firebase
+        self.firebase = firebase                                    //das Firebase Objekt wurde in die Firebase klasse eingegliedert
 
-        self.layout = QFormLayout()
-        self.email_edit = QLineEdit(self)
-        self.email_edit.setPlaceholderText("Enter your email")
-        self.password_edit = QLineEdit(self)
+        self.layout = QFormLayout()                                 // Für den Login screen wird ein Login Layout erstellt, sodass alles richtig gegliedert ist
+        self.email_edit = QLineEdit(self)                           // Ein edit Feld wird für den Login Screen erstellt, in diesem kann dann die Email eingeschrieben werden
+        self.email_edit.setPlaceholderText("Enter your email")      // Als Hintergrundtext für das Loginfeld steht "Enter your email", sodass der Nutzer das auch versteht, was er tun muss
+        self.password_edit = QLineEdit(self)                        // Das gleiche wie bei der Email wird auch für das Passwort gemacht.
         self.password_edit.setEchoMode(QLineEdit.Password)
         self.password_edit.setPlaceholderText("Enter your password")
-        self.login_button = QPushButton("Login", self)
-        self.login_button.clicked.connect(self.login_clicked)
+        self.login_button = QPushButton("Login", self)              // Bestätigungs Knopf für das Bestätigen der Email und das Passwort
+        self.login_button.clicked.connect(self.login_clicked)       // Der Knopf wird mit der login_click funktion verbunden. Ist der Knopf gedrückt worden, dann wird auch die Funktion ausgeführt.
 
-        self.layout.addRow(QLabel("Email:"), self.email_edit)
-        self.layout.addRow(QLabel("Password:"), self.password_edit)
-        self.layout.addRow(self.login_button)
+        self.layout.addRow(QLabel("Email:"), self.email_edit)       // Nun wird das Emailfeld in das Layout eingetragen und Email als Label Hinzugefügt
+        self.layout.addRow(QLabel("Password:"), self.password_edit) // Das gleiche gilt auch für das Passwordfelt
+        self.layout.addRow(self.login_button)                       // Auch wird der Knopf hinzugefügt
 
         self.setLayout(self.layout)
 
-    def login_clicked(self):
-        email = self.email_edit.text()
-        password = self.password_edit.text()
+    def login_clicked(self):                                        //Wird ausgeführt wenn der Loginknopf  gedrückt wird.
+        email = self.email_edit.text()                              //überschreibt die Variable email mit dem eingeschrieben email
+        password = self.password_edit.text()                        //überschreibt die Variable password mit dem eingeschrieben password
 
         try:
-            user = self.firebase.auth().sign_in_with_email_and_password(email, password)
+            user = self.firebase.auth().sign_in_with_email_and_password(email, password)    //Die funktion für das Einloggen wird ausgeführt mit den Variablen email und password
             print(f"Successfully logged in as {user['localId']}")
-            self.login_success.emit()
-        except Exception as e:
+            self.login_success.emit()                                                        // Falls der Einlogversuch funktioniert, dann ist der User eingeloggt und der User kann über das Programm Daten an den Server senden.
+        except Exception as e:                                                               // Falls der Einlogversuch nicht funktioniert, dann wird der User darüber informiert und kann es erneut versuchen.
             print(f"Login failed: {e}")
             msgBox = QMessageBox()
             msgBox.setIcon(QMessageBox.Information)
@@ -41,7 +41,7 @@ class LoginScreen(QWidget):
             msgBox.setWindowTitle("Login")
             msgBox.setStandardButtons(QMessageBox.Ok)
 
-class Dashboard(QWidget):
+class Dashboard(QWidget):                                            //Klasse für das Dashboard    Das Dashboad soll den User über die Lage der Maschineberichten und dem User erlauben auf die Maschine einfluss zu haben.
     def __init__(self, firebase, parent=None):
         super(Dashboard, self).__init__(parent)
         self.firebase = firebase
