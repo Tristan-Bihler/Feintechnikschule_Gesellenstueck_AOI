@@ -1,28 +1,33 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QMainWindow, QSplashScreen
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt, QTimer
 
-class CustomFontLabelApp(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('Main Window')
 
-        self.init_ui()
+class SplashScreen(QSplashScreen):
+    def __init__(self):
+        super().__init__()
+        self.setPixmap(QPixmap(r'hardware\\Raspberry_PI\\GUI\\9121424.jpg').scaled(QApplication.desktop().screenGeometry().width(), QApplication.desktop().screenGeometry().height()))  # Set your image path
+        self.showMessage('Your weather information',  # Set your weather information
+                         Qt.AlignBottom | Qt.AlignCenter,
+                         Qt.black)
 
-    def init_ui(self):
-        self.setGeometry(100, 100, 400, 200)
-        self.setWindowTitle('Custom Font QLabel')
-
-        layout = QVBoxLayout()
-
-        custom_font = QFont('ONE DAY', 20)  # Replace with your font file path and size
-        custom_font_label = QLabel('Hello, Custom Font!', self)
-        custom_font_label.setFont(custom_font)
-        layout.addWidget(custom_font_label)
-
-        self.setLayout(layout)
-        self.show()
+    def mousePressEvent(self, event):
+        self.close()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = CustomFontLabelApp()
+
+    splash = SplashScreen()
+    splash.show()
+
+    main_win = MainWindow()
+
+    # Show main window after splash screen is clicked
+    QTimer.singleShot(0, lambda: splash.close() or main_win.show())
+
     sys.exit(app.exec_())

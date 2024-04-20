@@ -3,14 +3,28 @@ from PyQt5.QtCore import Qt, QTimer, QDate, QTime
 from PyQt5.QtGui import QPixmap, QFont, QColor, QFontDatabase
 from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 import requests
+import openmeteo_requests
+
+import requests_cache
+import pandas as pd
+from retry_requests import retry
+from main import LoginScreen  # Import the other window
+
+cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
+retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
+openmeteo = openmeteo_requests.Client(session = retry_session)
+
 
 class Screensaver(QWidget):
     def __init__(self):
         super().__init__()
-
-
+        self.other_window = LoginScreen()  # Create an instance of the other window
         self.init_ui()
-
+    
+    def mousePressEvent(self, event):
+        self.close()
+        self.other_window.show()
+        
     def init_ui(self):
         self.setGeometry(100, 100, 800, 400)
         self.setWindowTitle('Screensaver')
@@ -33,11 +47,12 @@ class Screensaver(QWidget):
 
         self.setLayout(layout)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_screensaver)
-        self.timer.start(1000)  # Update screensaver every second
-
         self.show()
+
+        self.timer = QTimer(self)
+        self.timer.start(60000)  # Update screensaver every second
+        self.timer.timeout.connect(self.update_screensaver)
+
 
     def set_background_image(self, image_path):
         pixmap = QPixmap(image_path)
@@ -49,26 +64,40 @@ class Screensaver(QWidget):
         self.day_label.setText(f'{current_date} - {current_time.upper()}')
 
         try:
+            url = "https://api.open-meteo.com/v1/forecast"
             params = {
-                'q': "Villingen-Schwenningen",
-                'appid': "c736057682224bf2b58105011232312",
-                'units': 'metric'  # You can use 'imperial' for Fahrenheit
+                "latitude": 48.0623,
+                "longitude": 8.4936,
+                "current": ["temperature_2m", "is_day"],
+                "forecast_days": 1
             }
-            response = requests.get(base_url, params=params)
-            data = response.json()
+            responses = openmeteo.weather_api(url, params=params)
 
-            if response.status_code == 200:
-                main_weather = data['weather'][0]['main']
-                description = data['weather'][0]['description']
-                temperature = data['main']['temp']
-            else:
-                print(f"Error: {data['message']}")
+            # Process first location. Add a for-loop for multiple locations or weather models
+            response = responses[0]
+            print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
+            print(f"Elevation {response.Elevation()} m asl")
+            print(f"Timezone {response.Timezone()} {response.TimezoneAbbreviation()}")
+            print(f"Timezone difference to GMT+0 {response.UtcOffsetSeconds()} s")
+
+            # Current values. The order of variables needs to be the same as requested.
+            current = response.Current()
+            current_temperature_2m = current.Variables(0).Value()
+            current_is_day = current.Variables(1).Value()
 
         except Exception as e:
             print(f"Error: {e}")
-    
-        weather_data = {'condition': main_weather}
-        test = f'Weather: {weather_data["condition"]}'
+        
+        Time = current.Time()
+        temperature = round(current_temperature_2m,2)
+        t = temperature
+        if  current_is_day == 1:
+            day = "Tag"
+        else:
+            day = "Nacht"
+        
+
+        test =  str(t) + "°C" + " " + day
         self.weather_label.setText(test.upper())
 
 
