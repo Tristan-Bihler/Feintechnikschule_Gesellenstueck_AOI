@@ -162,6 +162,11 @@ class Dashboard(QWidget):                                            #Klasse fü
         machine_ref = self.db.child("machines").child("lumina_mk1")
         machine_ref.update({"status": 1})
 
+    def show_dashboard_screen(self):
+        self.dashboard_screen.show()
+        self.setCentralWidget(self.dashboard_screen)
+        self.setWindowTitle("Dashboard")
+
 class MainWindow(QMainWindow):
     def __init__(self, firebase):
         super(MainWindow, self).__init__()
