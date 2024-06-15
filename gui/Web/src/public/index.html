@@ -148,6 +148,7 @@
     </div>
 
     <script>
+        //firebase configurieren und initialisieren
         var firebaseConfig = {
             apiKey: "AIzaSyCst7QRNnFR9eC0YpiDYjYuAyjsrDdUtT4",
             authDomain: "tbstudios-aoi.firebaseapp.com",
@@ -162,6 +163,7 @@
 
         var storage = firebase.storage();
 
+        //wenn funktion gerufen Bild neuladen
         function loadImage(imageId, storagePath) {
             var storageRef = storage.ref();
             storageRef.child(storagePath).getDownloadURL().then(function(url) {
@@ -175,7 +177,7 @@
             loadImage('image1', 'images/compared.jpg');
             loadImage('image2', 'images/comoparrasion.jpg');
         });
-
+        //funktion für das wechseln der Übersichten
         function showContent(contentId) {
             document.getElementById('buttonContainer').style.display = 'none';
 
@@ -189,6 +191,7 @@
             }
         }
 
+        //Funtkion die das Main Menue aufruft
         function showButtons() {
             document.getElementById('buttonContainer').style.display = 'grid';
 
@@ -196,6 +199,7 @@
             contents.forEach(content => content.classList.remove('active'));
         }
 
+        //Funktion um die Anlage zu starten
         function start() {
             firebase.database().ref('machine/machine').set("active");
             firebase.database().ref('machine_mode/mode').set("active")
@@ -206,6 +210,7 @@
             });
         }
 
+        //Funktion um alle Variablen auszulesen
         function fetchAllVariables() {
             var allVarsRef = firebase.database().ref('/');
             allVarsRef.once('value', (snapshot) => {
@@ -221,6 +226,7 @@
             });
         }
 
+        //Funktion um die Anlage in Scan Modus zu setzen und überträgt die X und Y Koordinaten in prozent
         function updateFourVars() {
             var var1 = document.getElementById('var1').value;
             var var2 = document.getElementById('var2').value;
@@ -235,6 +241,7 @@
             });
         }
 
+        //Funktion um zu überprüfen, ob die eingegebene Variablen auch in prozent angegeben sind
         function validateInput(input) {
             if (input.value < 0) {
                 input.value = 0;
@@ -243,6 +250,7 @@
             }
         }
 
+        //Funktion um die gesamte übersich in dunkel Modus zu versetzen
         function toggleNightMode() {
             document.body.classList.toggle('night-mode');
             const contents = document.querySelectorAll('.content');
@@ -250,8 +258,8 @@
         }
 
     </script>
-    <script src="index.js"></script>
     <script>
+        //Service Worker um die Website auch als app zu benutzen
       if('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
       };
