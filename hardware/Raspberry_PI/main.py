@@ -38,7 +38,7 @@ def capture_image(picam2):
 
 #Funktion für das Vergleichen von den Bildern
 def compare_images(image1, image2, threshold=30):
-    gray1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)#Bilder farblos machen um die Licht toleranzen auszugleichen. Nichtgleichmäsiges licht kann die Ergebnisse beinflussen.
+    gray1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)#SSIM Funktioniert nur mit Farblosen Bildern
     gray2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
     
     abs_diff = cv2.absdiff(gray1, gray2)
