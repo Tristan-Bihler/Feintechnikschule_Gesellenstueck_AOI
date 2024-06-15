@@ -128,7 +128,7 @@
         </div>
         <input type="number" id="var1" class="input-field" placeholder="X in %" min="0" max="100" oninput="validateInput(this)">
         <input type="number" id="var2" class="input-field" placeholder="Y in %" min="0" max="100" oninput="validateInput(this)">
-        <button class="return-button" onclick="updateFourVars()">Platine Scannen</button>
+        <button class="return-button" onclick="Scann()">Platine Scannen</button>
         <div class="return-button" onclick="showButtons()">Zurück</div>
     </div>
     <div id="content3" class="content">
@@ -227,7 +227,7 @@
         }
 
         //Funktion um die Anlage in Scan Modus zu setzen und überträgt die X und Y Koordinaten in prozent
-        function updateFourVars() {
+        function Scann() {
             var var1 = document.getElementById('var1').value;
             var var2 = document.getElementById('var2').value;
             firebase.database().ref('x/x').set(var1);
