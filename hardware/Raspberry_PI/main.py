@@ -105,42 +105,44 @@ def machine_scan(picam2):
     cv2.destroyAllWindows()
         
 #Arduino auslesen und zurückschreiben
-def write_read_arduino(address, data):
+def write(address, data):
     bus = smbus.SMBus(1)
     
     try:
         bus.write_byte(address, data)
         time.sleep(0.2)
-        
-        response = bus.read_byte(address)
-        return response
+        return None
     except Exception as e:
         print(f"Failed to communicate with Arduino: {e}")
         return None
 
+def read(address):
+    bus = smbus.SMBus(1)
+    try:
+        response = bus.read_byte(address)
+        return response
+    except:
+        print(f"Failed to communicate with Arduino: {e}")
+        return 0
 #Schrittkettenartige Programmierung um die Kamera schrittartig auf die Poition zu fahren und he nach modus das Bild zu vergleichen oder für das spätere verhgleichen aufzunehmen
 def main():
     if read_from_firebase("/machine/machine") == "active": #Wenn die Anlage an ist
-        data = write_read_arduino(0x08, 110)
+        write(0x08, 110)
+        data = read(0x08)
         print(data)
         if data == 10:
+            write(0x08, int(read_from_firebase("/x/x")))
             while data != 20:
-                try:
-                    data = write_read_arduino(0x08, int(read_from_firebase("/x/x")))#X Werte übermitteln
-                except:
-                    db.child("/machine/machine").set("inactive")
-                    return 0
+                data = read(0x08)#X Werte übermitteln
                 print("x")
                 print(data)
                 if data == 90 or read_from_firebase("/machine/machine") == "inactive":# Wenn entweder der Arduino oder Firebase sagt das ein Problem auftritt oder die Anlage nicht mehr laufen soll
                     print("power off")
                     return 0
             if data == 20:
+                write(0x08, int(read_from_firebase("/y/y")))
                 while data != 30:
-                    try:
-                        data = write_read_arduino(0x08, int(read_from_firebase("/y/y")))#Y Werte übermitteln
-                    except:
-                        return 0
+                    data = read(0x08)#Y Werte übermitteln
                     print("y")
                     print(data)
                     if data == 90 or read_from_firebase("/machine/machine") == "inactive":
@@ -148,16 +150,18 @@ def main():
                         db.child("/machine/machine").set("inactive")
                         return 0
                 if data == 30:
+                    write(0x08, 120)
                     while data != 40:
-                        data = write_read_arduino(0x08, 120)#Bestätigen das die Verbindung noch aufrecht ist und der Arduino die Leds anschalten soll
+                        data = read(0x08)#Bestätigen das die Verbindung noch aufrecht ist und der Arduino die Leds anschalten soll
                         print("passed")
                         print(data)
                         if data == 90 or read_from_firebase("/machine/machine") == "inactive":
                             print("power off")
                             return 0
                     if data == 40:
+                        write(0x08, 130)#Bestägitgen das die LEDs an sind und je nach Modus das Bild aufzunehemen
                         while data != 50:
-                            data = write_read_arduino(0x08, 130)#Bestägitgen das die LEDs an sind und je nach Modus das Bild aufzunehemen
+                            data = read(0x08)
                             print("passed")
                             print(data)
                             if data == 90 or read_from_firebase("/machine/machine") == "inactive":
@@ -169,8 +173,9 @@ def main():
                                 machine_active(picam2)
                                 upload_image('compared_image.jpg', 'images/compared.jpg')
                                 upload_image('taken.jpg', 'images/taken.jpg')
+                                data = write(0x08, 140)
                                 while data != 60:
-                                    data = write_read_arduino(0x08, 140)# Arduino bescheid geben auf Home zu fahren und die Neopixels auszuschalten
+                                    data = read(0x08)# Arduino bescheid geben auf Home zu fahren und die Neopixels auszuschalten
                                     print("finish")
                                     print(data)
                                     if data == 90 or read_from_firebase("/machine/machine") == "inactive":
@@ -184,8 +189,9 @@ def main():
                             elif read_from_firebase("/machine_mode/mode") == "scan": # Wenn der Modus auf Bild aufnehmen für das spätere Vergleichen gestellt ist
                                 machine_scan(picam2)
                                 upload_image('comoparrasion.jpg', 'images/comoparrasion.jpg')
+                                data = write(0x08, 140)
                                 while data != 60:
-                                    data = write_read_arduino(0x08, 140)# Arduino bescheid geben auf Home zu fahren und die Neopixels auszuschalten
+                                    data = read(0x08)# Arduino bescheid geben auf Home zu fahren und die Neopixels auszuschalten
                                     print("finish")
                                     print(data)
                                     if data == 90 or read_from_firebase("/machine/machine") == "inactive":
