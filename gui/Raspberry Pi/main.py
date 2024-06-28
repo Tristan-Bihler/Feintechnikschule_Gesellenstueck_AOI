@@ -1,10 +1,28 @@
 # Bibliotheken einbinden
 from rpi_ws281x import PixelStrip, Color
 import RPi.GPIO as GPIO
-import time
 import board
 import neopixel
 from pyrebase import pyrebase
+
+import subprocess
+import time
+import os
+
+def is_connected():
+    # Check if there is a network connection by pinging a reliable external host
+    try:
+        # Use Google's public DNS server for the test
+        subprocess.check_call(["ping", "-c", "1", "8.8.8.8"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+while not is_connected():
+    print("No WiFi connection detected. Retrying...")
+    time.sleep(5)  # Wait for 5 seconds before retrying
+    
+print("WiFi connection established!")
 
 # Outputs und Inputs definieren
 pixels = neopixel.NeoPixel(board.D21, 5)

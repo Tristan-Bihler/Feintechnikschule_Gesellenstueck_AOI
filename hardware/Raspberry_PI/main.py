@@ -66,7 +66,7 @@ def compare_images(image1, image2, threshold=30):
     mask = thresh_diff.astype(bool)
     
     if np.sum(mask) > 0:  
-        ssim_score, _ = ssim(gray1[mask], gray2[mask], full=True)
+        ssim_score, _ = ssim(gray1, gray2, full=True)
     else:
         ssim_score = 1.0
 
