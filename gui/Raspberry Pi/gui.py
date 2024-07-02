@@ -39,17 +39,45 @@ def start_action():
     db.child("/machine_mode/mode").set("active")
     db.child("/machine/machine").set("active")
 
-#SSIM updaten wenn nutzer den neuen wert sehen möchte
+def read_from_firebase(path):
+    data = db.child(path).get()
+    if data.val():
+        return data.val()
+    else:
+        return "No data available"
+    
+# SSIM updaten wenn Nutzer den neuen Wert sehen möchte
 def update_ssim():
     ssim_value = read_ssim()
     ssim_label.config(text=f"SSIM: {ssim_value}")
 
-    if ssim_value > 90:
-        pass_label.config(text ="Passed", fg = "green")
-    elif ssim_value < 90:
-        pass_label.config(text = "Not Passed", fg = "red")
+    notaus = read_from_firebase("/Not_Aus/Not_Aus")
+    door = read_from_firebase("/door/door")
 
-# Ssim von Firebase auslesen
+    NOT_AUS_label.config(text=read_from_firebase("/Not_Aus/Not_Aus"))
+    TÜR_Label.config(text=read_from_firebase("/door/door"))
+
+    if door == "closed":
+        TÜR_Label.config(text=f"Tür: {door}", fg = "green")
+    elif door == "open":
+        TÜR_Label.config(text=f"Tür: {door}", fg = "red")
+
+    if notaus == "inactive":
+        NOT_AUS_label.config(text=f"Not-Aus: {notaus}", fg = "green")
+    elif notaus == "active":
+        NOT_AUS_label.config(text=f"Not-Aus: {notaus}", fg = "red")
+
+    if read_from_firebase("/machine/machine") == "inactive":
+        if ssim_value > 90:
+            pass_label.config(text="Test: approved", fg="green")
+        elif ssim_value < 90:
+            pass_label.config(text="Test: rejected", fg="red")
+    
+    elif read_from_firebase("/machine/machine") == "active":
+        pass_label.config(text="Testing", fg="white")
+        ssim_label.config(text=f"N.A.")
+
+# SSIM von Firebase auslesen
 def read_ssim():
     try:
         ssim_value = db.child("ssim").get().val()
@@ -59,12 +87,16 @@ def read_ssim():
         messagebox.showerror("Error", f"Failed to read ssim: {e}")
         return None
 
-# Tkinter Gui erstellen mit auslesen der Ssim
+# Funktion zum kontinuierlichen Aktualisieren der SSIM-Werte
+def continuous_update():
+    update_ssim()
+    root.after(2000, continuous_update)  # Ruft diese Funktion alle 2 Sekunden auf
+
+# Tkinter GUI erstellen mit Auslesen der SSIM
 root = tk.Tk()
 root.title("Firebase Tkinter App")
 
 root.attributes('-fullscreen', True)
-
 root.configure(bg='gray12')
 
 frame = tk.Frame(root, bg='gray12')
@@ -80,27 +112,31 @@ else:
     ssim_label.pack(pady=20)
 
 if ssim_value > 90:
-    pass_label = tk.Label(label_frame, text=f"Passed", bg='gray12', fg='green', font=("Helvetica", 24))
+    pass_label = tk.Label(label_frame, text="Passed", bg='gray12', fg='green', font=("Helvetica", 24))
     pass_label.pack(pady=20)
 elif ssim_value < 90:
     pass_label = tk.Label(label_frame, text="Not Passed", bg='gray12', fg='red', font=("Helvetica", 24))
     pass_label.pack(pady=20)
 
-label_frame.pack(side=tk.RIGHT)
+NOT_AUS_label = tk.Label(label_frame, bg='gray12', font=("Helvetica", 24))
+NOT_AUS_label.pack(pady=20)
 
+TÜR_Label = tk.Label(label_frame, bg='gray12', font=("Helvetica", 24))
+TÜR_Label.pack(pady=20)
+
+label_frame.pack(side=tk.RIGHT, padx=75)
 
 button_frame = tk.Frame(frame, bg='gray12')
-button_style = {"font": ("Helvetica", 24), "bg": "darkgreen", "fg": "white", "activebackground": "green", "activeforeground": "white"}
+button_style = {"font": ("Helvetica", 24), "bg": "darkgreen", "fg": "white", "activebackground": "green", "activeforeground": "white", "width": 20, "height": 6}
 
 start_button = tk.Button(button_frame, text="Start", command=start_action, **button_style)
-start_button.pack(pady=20)
-
-update_button = tk.Button(button_frame, text="Update", command=update_ssim, **button_style)
-update_button.pack(pady=20)
+start_button.pack(pady=20, padx=20)
 
 button_frame.pack(side=tk.RIGHT)
 
 root.bind("<Escape>", lambda event: root.attributes("-fullscreen", False))
 
-root.mainloop()
+# Starte das kontinuierliche Aktualisieren
+continuous_update()
 
+root.mainloop()
